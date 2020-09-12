@@ -7,8 +7,8 @@ import subprocess
 from twisted.internet import task, reactor
 
 mytimes = {
-	"screen_shot" = 1
-	"ascend" = 60
+	"screen_shot": 1,
+	"ascend": 60
 }
 
 pyautogui.PAUSE=0.4
