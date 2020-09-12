@@ -7,33 +7,38 @@ import subprocess
 from twisted.internet import task, reactor
 
 mytimes = {
-	"screen_shot": 1,
-	"ascend": 60
+    "screen_shot": 1,
+    "ascend": 35
 }
 
+ascension = 0
 pyautogui.PAUSE=0.4
 startTime = time.time()
 
 def get_print_time():
-	return str(math.ceil((time.time()-startTime)/60))
+    minute = str(math.ceil((time.time()-startTime)/60))
+    if (ascension > 0):
+        return minute + '-' + str(ascension)
+    return minute
 
 def get_new_end_time(minutes=15):
-	return time.time() + 60 * minutes
+    return time.time() + 60 * minutes
 
 def ascend():
-	print('Acending at', get_print_time())
-	pyautogui.moveTo(431, 138)
-	pyautogui.dragTo()
-	pyautogui.click()
-	#pyautogui.click(x=431, y=138, clicks=2, interval=1)
+    print('Acending at', get_print_time())
+    ascension+=1
+    pyautogui.moveTo(431, 138)
+    pyautogui.dragTo()
+    pyautogui.click()
+    #pyautogui.click(x=431, y=138, clicks=2, interval=1)
 
 def screen_shot():
-	print('Screen shot at', get_print_time())
-	file_name = 'ascend' + get_print_time() + '.png'
-	pyautogui.screenshot(file_name, region=(0,0,1200,800))
+    print('Screen shot at', get_print_time())
+    file_name = 'ascend' + get_print_time() + '.png'
+    pyautogui.screenshot(file_name, region=(0,0,1200,800))
        
 def level_up():
-	pyautogui.press('space')
+    pyautogui.press('space')
 
 
 print (sys.platform)
@@ -41,8 +46,8 @@ if 'darwin' in sys.platform:
     print('Running \'caffeinate\' on MacOSX to prevent the system from sleeping')
     subprocess.Popen('caffeinate')
 # while (True):
-# 	currentMouseX, currentMouseY = pyautogui.position() # Get the XY position of the mouse.
-# 	print (currentMouseX, currentMouseY)
+#   currentMouseX, currentMouseY = pyautogui.position() # Get the XY position of the mouse.
+#   print (currentMouseX, currentMouseY)
 pyautogui.moveTo(1393, 138) 
 pyautogui.dragTo()
 pyautogui.click()          
