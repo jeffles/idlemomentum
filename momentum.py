@@ -35,7 +35,7 @@ def ascend():
 def screen_shot():
     print('Screen shot at', get_print_time())
     file_name = 'ascend' + get_print_time() + '.png'
-    pyautogui.screenshot(file_name, region=(0,0,1200,800))
+    pyautogui.screenshot(file_name, region=(690,235,310,70))
        
 def level_up():
     pyautogui.press('space')
