@@ -1,11 +1,15 @@
 import math
 import pyautogui
-import time
+import pytesseract
+import re
 import sys
 import subprocess
+import time
 
 from filecmp import cmp
 from twisted.internet import task, reactor
+
+# OCR help - https://www.pyimagesearch.com/2017/07/10/using-tesseract-ocr-python/
 
 mytimes = {
     "screen_shot": 1,
@@ -27,7 +31,7 @@ def get_print_time():
 def ascend():
     global ascension
     global start_time
-    print('Acending at', get_print_time())
+    print('Ascending at', get_print_time())
     ascension+=1
     start_time = time.time()
     pyautogui.moveTo(431, 138)
@@ -38,15 +42,21 @@ def ascend():
 def screen_shot():
     global previous_file_name
     global run_without_improvement
-    print('Screen shot at', get_print_time())
     file_name = 'ascend' + get_print_time() + '.png'
-    pyautogui.screenshot(file_name, region=(865,235,160,70))
+    pyautogui.screenshot(file_name, region=(870,245,140,45))
+    text = pytesseract.image_to_string(file_name)
+    ascend_points = re.search('.(\d+)', text)
+    if ascend_points:
+        ascend_points = ascend_points.group(1)
+
     if previous_file_name:
         same = cmp(previous_file_name, file_name)
-        if same:
-            run_without_improvement += 1
-        else:
-            run_without_improvement = 0
+    if same:
+        run_without_improvement += 1
+        print(f'Same {ascend_points} - {file_name} ')
+    else:
+        run_without_improvement = 0
+        print(f'Better {ascend_points} - {file_name}')
     previous_file_name = file_name
     if start_time > 300 and run_without_improvement > 1:
         ascend();
@@ -54,6 +64,7 @@ def screen_shot():
        
 def level_up():
     pyautogui.press('space')
+
 
 
 print (sys.platform)
