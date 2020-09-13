@@ -1,3 +1,4 @@
+import cv2
 import math
 import pyautogui
 import pytesseract
@@ -13,7 +14,7 @@ from twisted.internet import task, reactor
 
 mytimes = {
     "screen_shot": 1,
-    "ascend": 35
+    "ascend": 6
 }
 
 ascension = 0
@@ -31,8 +32,10 @@ def get_print_time():
 def ascend():
     global ascension
     global start_time
+    global run_without_improvement
     print('Ascending at', get_print_time())
     ascension+=1
+    run_without_improvement = 0
     start_time = time.time()
     pyautogui.moveTo(431, 138)
     pyautogui.dragTo()
@@ -43,20 +46,33 @@ def screen_shot():
     global previous_file_name
     global run_without_improvement
     file_name = 'ascend' + get_print_time() + '.png'
-    pyautogui.screenshot(file_name, region=(870,245,140,45))
-    text = pytesseract.image_to_string(file_name)
-    ascend_points = re.search('.(\d+)', text)
-    if ascend_points:
-        ascend_points = ascend_points.group(1)
+    pyautogui.screenshot(file_name, region=(890,245,130,45))
 
+
+    image = cv2.imread(file_name)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # gray = cv2.threshold(gray, 0, 255,
+    #     cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    gray = cv2.medianBlur(gray, 3)
+
+    gray_file_name = f"{file_name}-grey.png"
+    cv2.imwrite(gray_file_name, gray)
+
+    text = pytesseract.image_to_string(gray_file_name).rstrip()
+    ascend_points = re.search('\d+', text)
+    if ascend_points:
+        ascend_points = ascend_points.group(0)
+
+    same = True
     if previous_file_name:
         same = cmp(previous_file_name, file_name)
     if same:
         run_without_improvement += 1
-        print(f'Same {ascend_points} - {file_name} ')
+        print(f'Same {ascend_points} {text} - {file_name} ')
     else:
         run_without_improvement = 0
-        print(f'Better {ascend_points} - {file_name}')
+        print(f'Better {ascend_points} {text} - {file_name}')
     previous_file_name = file_name
     if start_time > 300 and run_without_improvement > 1:
         ascend();
@@ -66,7 +82,7 @@ def level_up():
     pyautogui.press('space')
 
 
-
+time.sleep(2)
 print (sys.platform)
 if 'darwin' in sys.platform:
     print('Running \'caffeinate\' on MacOSX to prevent the system from sleeping')
@@ -85,7 +101,7 @@ loop1.start(.5)
 loop2 = task.LoopingCall(screen_shot) 
 loop2.start(mytimes['screen_shot']*60, now=True)
 
-# loop3 = task.LoopingCall(ascend)
-# loop3.start(mytimes['ascend']*60, now=False)
+loop3 = task.LoopingCall(ascend)
+loop3.start(mytimes['ascend']*60, now=False)
 
 reactor.run()
